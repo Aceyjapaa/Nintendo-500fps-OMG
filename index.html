@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>もっと！なんちゃってFPSブースター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* フォントの設定 */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* ボタンのアニメーション */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .8; transform: scale(1.03); }
+        }
+        .animate-pulse-custom {
+            animation: pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        /* コンソール風の表示エリア */
+        #consoleOutput {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap; /* 改行をそのまま表示 */
+            word-wrap: break-word; /* 長い行を折り返す */
+            height: 200px; /* 高さを固定 */
+            overflow-y: auto; /* 縦スクロールを有効に */
+            border: 1px solid #4a5568; /* 枠線 */
+            background-color: #1a202c; /* 背景色 */
+            color: #34d399; /* テキストの色 (少し明るい緑) */
+            padding: 1rem; /* 内側の余白 */
+            border-radius: 0.375rem; /* 角丸 */
+            margin-top: 1rem; /* 上の余白 */
+            font-size: 0.875rem; /* 少し小さめの文字 */
+        }
+        /* スクロールバーのスタイル (任意) */
+        #consoleOutput::-webkit-scrollbar {
+            width: 8px;
+        }
+        #consoleOutput::-webkit-scrollbar-track {
+            background: #2d3748; /* トラックの背景色 */
+            border-radius: 4px;
+        }
+        #consoleOutput::-webkit-scrollbar-thumb {
+            background-color: #4a5568; /* スクロールバーの色 */
+            border-radius: 4px;
+            border: 2px solid #2d3748; /* トラック背景との境界 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center max-w-lg w-full border border-indigo-500/30">
+        <h1 class="text-3xl font-bold mb-4 text-indigo-400 animate-bounce">
+             🚀 もっと！なんちゃってFPSブースター 🚀
+        </h1>
+        <p class="mb-6 text-gray-400 italic">「信じる者は救われる」…かもしれない運転。</p>
+
+        <button id="boostButton" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-110 animate-pulse-custom focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2 lucide lucide-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            FPSを500にブースト！(願望)
+        </button>
+
+        <div id="progressContainer" class="mt-8 hidden">
+            <p id="statusText" class="text-lg mb-2 text-yellow-400 font-semibold">処理中...</p>
+            <div class="w-full bg-gray-700 rounded-full h-5 shadow-inner overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-r from-green-400 to-blue-500 h-5 rounded-full transition-all duration-500 ease-linear text-xs font-medium text-blue-100 text-center p-0.5 leading-none" style="width: 0%">
+                    <span id="progressPercent">0%</span>
+                </div>
+            </div>
+            <div id="consoleOutput" class="mt-4"></div>
+        </div>
+
+        <p id="resultMessage" class="mt-6 text-xl font-semibold hidden"></p>
+    </div>
+
+    <footer class="mt-8 text-center text-gray-500 text-sm">
+        ※このプログラムはジョークです。実際の性能向上効果はありません。
+    </footer>
+
+    <script>
+        const boostButton = document.getElementById('boostButton');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const statusText = document.getElementById('statusText');
+        const resultMessage = document.getElementById('resultMessage');
+        const consoleOutput = document.getElementById('consoleOutput');
+
+        // さらにユーモラスな冗談メッセージ
+        const jokeMessages = [
+            "完了！FPSが500になりました！…って言えたらなぁ…(遠い目)",
+            "ブースト成功！…という暗示をかけました。",
+            "エラー：Switch「もう無理ですってば！」(悲鳴)",
+            "処理完了！気分だけは異次元のヌルヌル感！",
+            "最適化完了！プラシーボ効果に期待しましょう！",
+            "必要なもの：『気合』『根性』そして『折れない心』。",
+            "警告：FPS向上の夢を見すぎて現実に戻れなくなる可能性があります。",
+            "500FPS達成！(※ただし脳内)",
+            "おめでとう！あなたのSwitchは…何も変わっていません！でも楽しかったでしょ？",
+            "成功！…って言いたいけど、現実は非情である。",
+            "内部の妖精さんが頑張りました！(たぶん)"
+        ];
+
+        // さらにユーモラスなコンソールメッセージ
+        const consoleLines = [
+            "Initializing Super Hyper Ultimate FPS Booster v0.Funny...",
+            "Connecting to Switch... (念力で)",
+            "Bypassing reality... Please wait.",
+            "Injecting 'Nuru-Nuru' particles...",
+            "Recalibrating coffee maker... Oops, wrong device.",
+            "Downloading more RAM... (Not really, just pretending).",
+            "Asking the Switch nicely to go faster...",
+            "Negotiating with pixels...",
+            "Engaging Ludicrous Speed! (Warning: May cause plaid screen)",
+            "Checking for leftover magic dust...",
+            "Optimizing... with the power of friendship!",
+            "Almost there... maybe tomorrow?",
+            "Boost complete-ish!",
+        ];
+
+        // 面白いステータステキスト
+        const statusUpdates = [
+            { progress: 10, text: "念力を送信中..." },
+            { progress: 25, text: "ピクセルを説得中..." },
+            { progress: 40, text: "妖精さんと交渉中..." },
+            { progress: 60, text: "魔法をかけています..." },
+            { progress: 75, text: "謎の最適化を実行中..." },
+            { progress: 90, text: "最終確認 (たぶん)..." },
+            { progress: 100, text: "完了！(したはず)" }
+        ];
+
+        let currentStatusIndex = 0;
+
+        boostButton.addEventListener('click', () => {
+            boostButton.disabled = true;
+            boostButton.classList.remove('animate-pulse-custom');
+            boostButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2 lucide lucide-hourglass animate-spin"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+                ブースト中...
+            `;
+            boostButton.classList.add('opacity-70', 'cursor-wait');
+
+            progressContainer.classList.remove('hidden');
+            resultMessage.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            statusText.textContent = '処理開始！';
+            consoleOutput.textContent = '';
+            currentStatusIndex = 0; // ステータスインデックスをリセット
+
+            let progress = 0;
+            let consoleIndex = 0;
+
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 5) + 1; // 進捗をランダムに
+                progress = Math.min(progress, 100); // 100%を超えないように
+                progressBar.style.width = `${progress}%`;
+                progressPercent.textContent = `${progress}%`;
+
+                // ステータステキストの更新
+                if (currentStatusIndex < statusUpdates.length && progress >= statusUpdates[currentStatusIndex].progress) {
+                    statusText.textContent = statusUpdates[currentStatusIndex].text;
+                    currentStatusIndex++;
+                }
+
+                // コンソールに1行ずつ表示 (少し遅延させる)
+                if (consoleIndex < consoleLines.length && Math.random() < 0.6) { // たまに表示
+                    consoleOutput.textContent += '> ' + consoleLines[consoleIndex] + '\n';
+                    consoleOutput.scrollTop = consoleOutput.scrollHeight; // 自動スクロール
+                    consoleIndex++;
+                }
+
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    statusText.textContent = '完了！(したことにする)';
+
+                    // ランダムな冗談メッセージを表示
+                    const randomJoke = jokeMessages[Math.floor(Math.random() * jokeMessages.length)];
+                    resultMessage.textContent = `🎉 ${randomJoke} 🎉`;
+                    resultMessage.classList.remove('hidden');
+                    // 結果に応じて色を変える (遊び心)
+                    const resultColors = ['text-green-400', 'text-yellow-400', 'text-pink-400', 'text-cyan-400'];
+                    resultMessage.className = `mt-6 text-xl font-semibold ${resultColors[Math.floor(Math.random() * resultColors.length)]}`;
+
+
+                    // ボタンを再度有効化し、面白いテキストに変更
+                    boostButton.disabled = false;
+                    boostButton.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2 lucide lucide-rotate-cw"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                        もう一回騙されてみる？
+                    `;
+                    boostButton.classList.remove('opacity-70', 'cursor-wait');
