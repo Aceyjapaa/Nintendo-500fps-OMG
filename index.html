@@ -192,3 +192,10 @@
                         もう一回騙されてみる？
                     `;
                     boostButton.classList.remove('opacity-70', 'cursor-wait');
+                    boostButton.classList.add('animate-pulse-custom'); // アニメーション再開
+                }
+            }, 150 + Math.random() * 150); // 更新間隔も少しランダムに
+        });
+    </script>
+</body>
+</html>
